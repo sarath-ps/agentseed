@@ -2,6 +2,15 @@
 
 This file is the single source of truth for all agent roles and Party Mode behaviour.
 
+## Skills Location (Important)
+
+**Canonical skills directory:** `.agents/skills/`
+
+All AgentSeed skills live under `.agents/skills/`.  
+Agents and tools **must** load skills from this path.
+
+This location was chosen for broader compatibility across tools (Cursor, Codex, Claude Code, Copilot, Antigravity/Gemini, etc.). Individual tools may also look in their native paths (`.cursor/skills/`, `.claude/skills/`, …). When in doubt, prefer `.agents/skills/`.
+
 ## Roles (Generic)
 
 | Role | Primary Responsibility |
