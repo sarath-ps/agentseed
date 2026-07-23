@@ -25,23 +25,26 @@ app = typer.Typer(
 )
 console = Console()
 
-# Templates are expected relative to the installed package or the repo root.
 TEMPLATES = {
     "minimal": "templates/minimal",
     "polyglot-monorepo": "templates/polyglot-monorepo",
 }
 
-DEFAULT_MCP_PATH = Path(".cursor/mcp.json")
+# Canonical, tool-neutral MCP config (same idea as .agents/skills/).
+DEFAULT_MCP_PATH = Path(".agents/mcp.json")
+
+# Optional mirrors for tools that only read their own paths.
+TOOL_MCP_MIRRORS = {
+    "cursor": Path(".cursor/mcp.json"),
+    "claude": Path(".claude/mcp.json"),
+}
 
 
 def _find_templates_root() -> Path:
-    """Locate the templates directory (works both from source and installed package)."""
-    # 1. Try relative to this file (source checkout)
     candidate = Path(__file__).resolve().parents[2] / "templates"
     if candidate.is_dir():
         return candidate
 
-    # 2. Fallback: current working directory
     cwd_candidate = Path.cwd() / "templates"
     if cwd_candidate.is_dir():
         return cwd_candidate
@@ -117,7 +120,7 @@ def init(
             f"Next steps:\n"
             f"  1. cd {name}\n"
             f"  2. Ensure skills are available under .agents/skills/\n"
-            f"  3. Optionally: agentseed add-mcp filesystem github\n"
+            f"  3. Optionally: agentseed add-mcp filesystem github --sync\n"
             f"  4. Read AGENTS.md and start with /party ideation",
             title="AgentSeed",
         )
@@ -142,7 +145,13 @@ def list_mcp() -> None:
         table.add_row(name, get_server_description(name))
     console.print(table)
     console.print(
-        "\nAdd with: [bold]agentseed add-mcp filesystem github[/bold]"
+        "\nCanonical config path: [bold].agents/mcp.json[/bold]"
+    )
+    console.print(
+        "Add with: [bold]agentseed add-mcp filesystem github[/bold]"
+    )
+    console.print(
+        "Mirror to Cursor/Claude: [bold]agentseed add-mcp filesystem github --sync[/bold]"
     )
 
 
@@ -150,21 +159,30 @@ def list_mcp() -> None:
 def add_mcp(
     servers: Optional[list[str]] = typer.Argument(
         None,
-        help="Server names to add (e.g. filesystem github). Omit to be prompted.",
+        help="Server names to add (e.g. filesystem github). Omit to list available servers.",
     ),
     path: Path = typer.Option(
         DEFAULT_MCP_PATH,
         "--path",
         "-p",
-        help="Target MCP config file (default: .cursor/mcp.json)",
+        help="Canonical MCP config file (default: .agents/mcp.json)",
     ),
     force: bool = typer.Option(
         False,
         "--force",
         help="Overwrite an existing server entry with the same name",
     ),
+    sync: bool = typer.Option(
+        False,
+        "--sync",
+        help="Also mirror the config to .cursor/mcp.json and .claude/mcp.json",
+    ),
 ) -> None:
-    """Add one or more MCP servers to the project MCP config."""
+    """Add one or more MCP servers to the project MCP config.
+
+    Writes to the tool-neutral path .agents/mcp.json by default.
+    Use --sync to also copy into Cursor/Claude project paths.
+    """
     known = list_server_names()
 
     if not servers:
@@ -172,7 +190,10 @@ def add_mcp(
         for name in known:
             console.print(f"  • {name} — {get_server_description(name)}")
         console.print(
-            "\nUsage: [bold]agentseed add-mcp filesystem github[/bold]"
+            "\nUsage: [bold]agentseed add-mcp filesystem github[--sync][/bold]"
+        )
+        console.print(
+            f"Default path: [bold]{DEFAULT_MCP_PATH}[/bold] (tool-neutral)"
         )
         raise typer.Exit(0)
 
@@ -200,12 +221,24 @@ def add_mcp(
 
     _save_mcp_config(path, config)
 
+    mirrored: list[str] = []
+    if sync:
+        for tool_name, mirror_path in TOOL_MCP_MIRRORS.items():
+            _save_mcp_config(mirror_path, config)
+            mirrored.append(str(mirror_path))
+
     lines = [f"[green]MCP config updated[/green]: {path}\n"]
     if added:
         lines.append(f"Added   : {', '.join(added)}")
     if skipped:
         lines.append(
             f"Skipped : {', '.join(skipped)} (already present; use --force to overwrite)"
+        )
+    if mirrored:
+        lines.append(f"Mirrored: {', '.join(mirrored)}")
+    elif not sync:
+        lines.append(
+            "\nTip: add [bold]--sync[/bold] to also write .cursor/mcp.json and .claude/mcp.json"
         )
     lines.append(
         "\nReload your agent / IDE so it picks up the new MCP servers."
