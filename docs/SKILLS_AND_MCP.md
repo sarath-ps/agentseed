@@ -39,6 +39,22 @@ This document is the checklist for what AgentSeed ships and what is still recomm
 
 MCP gives agents **executable tools**. Skills give them **procedural knowledge**. Both are useful.
 
+### Canonical config path
+
+```text
+.agents/mcp.json
+```
+
+Same neutrality principle as `.agents/skills/`.
+
+Tool-specific mirrors (optional, via `agentseed add-mcp ... --sync`):
+
+| Tool | Path |
+|------|------|
+| Cursor | `.cursor/mcp.json` |
+| Claude Code | `.claude/mcp.json` |
+| Codex | `.codex/config.toml` (different format; not auto-synced yet) |
+
 ### Recommended baseline MCP servers
 
 | Server | Why |
@@ -50,19 +66,17 @@ MCP gives agents **executable tools**. Skills give them **procedural knowledge**
 | **kubernetes** (optional) | For platform / SRE style repos |
 | **browser / playwright** (optional) | UI verification |
 
-### Configuration locations (tool-dependent)
+### CLI
 
-| Tool | Typical config location |
-|------|-------------------------|
-| Cursor | `.cursor/mcp.json` or Cursor settings |
-| Claude Code / Desktop | Claude config / MCP settings |
-| Other agents | Tool-specific MCP config |
-
-AgentSeed does **not** force a single MCP config format. Instead it ships examples under `examples/mcp/`.
+```bash
+agentseed list-mcp
+agentseed add-mcp filesystem github
+agentseed add-mcp filesystem github --sync
+```
 
 ### Principles
 
 1. MCP is optional — core skills and Party Mode work without it.
 2. Prefer least-privilege servers.
-3. Templates may recommend a starter set; they should not hard-require external services.
-4. Document what each server is for so humans and agents understand the surface area.
+3. Keep a **canonical** config under `.agents/`; mirror only when a tool cannot read that path.
+4. Templates may recommend a starter set; they should not hard-require external services.
