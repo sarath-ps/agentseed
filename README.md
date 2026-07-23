@@ -11,7 +11,7 @@ It gives you:
 - **Party Mode** — multi-agent collaboration you can invoke at any time for ideation, architecture reviews, technical evaluation, design reviews, and risk reviews
 - Cost-aware speaker selection and modes (`session` / `hybrid` / `subagent`)
 - Project templates (`minimal`, `polyglot-monorepo`)
-- A lightweight CLI (`agentseed init …`)
+- A lightweight CLI (`agentseed init`, `add-mcp`, …)
 - Skills that work across Cursor, Codex, Claude Code, Copilot, Antigravity/Gemini, and other tools that support the Agent Skills format
 
 ---
@@ -28,15 +28,19 @@ pip install -e .          # or: uv pip install -e .
 agentseed init my-project --template minimal
 agentseed init my-services --template polyglot-monorepo
 
+# Optionally attach MCP servers
+cd my-project
+agentseed add-mcp filesystem github
+
 # Other commands
 agentseed list-templates
+agentseed list-mcp
 agentseed version
 ```
 
 Then:
 
 ```bash
-cd my-project
 # Ensure skills are available under .agents/skills/
 # Read AGENTS.md and start working
 ```
@@ -64,6 +68,10 @@ cd my-project
 | `agentseed init <name> -t polyglot-monorepo` | Create a polyglot monorepo skeleton |
 | `agentseed init <name> --force` | Overwrite the target directory if it already exists |
 | `agentseed list-templates` | Show available templates |
+| `agentseed list-mcp` | Show known MCP servers |
+| `agentseed add-mcp <server> [server…]` | Add MCP servers to `.cursor/mcp.json` |
+| `agentseed add-mcp filesystem github --force` | Overwrite existing server entries |
+| `agentseed add-mcp github -p path/to/mcp.json` | Write to a custom config path |
 | `agentseed version` | Print the current version |
 
 ### Examples
@@ -75,14 +83,20 @@ agentseed init demo-app
 # Polyglot monorepo
 agentseed init platform --template polyglot-monorepo
 
-# Overwrite an existing directory
-agentseed init demo-app --force
+# Attach baseline MCP servers
+cd platform
+agentseed add-mcp filesystem github
 
-# Discover templates
-agentseed list-templates
+# See what servers AgentSeed knows about
+agentseed list-mcp
+
+# Overwrite an existing entry
+agentseed add-mcp github --force
 ```
 
-After creation the CLI prints the next steps (enter the directory, ensure skills are present, read `AGENTS.md`).
+After `add-mcp`, reload your agent/IDE so it picks up the new servers.  
+For `github`, set `GITHUB_PERSONAL_ACCESS_TOKEN` in your environment.  
+For `postgres`, set `DATABASE_URL`.
 
 ---
 
@@ -128,6 +142,15 @@ Presets include `ideation`, `architecture-review`, `technical-evaluation`, `desi
 Agents and tools should load skills from this directory.  
 A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 
+### 5. MCP (optional)
+
+MCP gives agents executable tools. Skills give procedural knowledge.
+
+- Catalog and examples: `examples/mcp/` and `docs/SKILLS_AND_MCP.md`
+- Install helpers: `agentseed list-mcp` / `agentseed add-mcp`
+
+Baseline recommendation: `filesystem` + `github`.
+
 ---
 
 ## Repository Layout
@@ -143,6 +166,8 @@ A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 ├── templates/
 │   ├── minimal/
 │   └── polyglot-monorepo/
+├── examples/mcp/             # MCP config examples
+├── docs/                     # Skills & MCP inventory
 ├── src/agentseed/            # CLI package
 ├── .cursor/skills/           # Compatibility note only
 ├── pyproject.toml
@@ -155,10 +180,11 @@ A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 
 - [x] Project templates (`minimal`, `polyglot-monorepo`)
 - [x] `.gitignore` and MIT License
-- [x] Lightweight CLI (`agentseed init`, `list-templates`, `version`)
-- [ ] MCP server configuration helpers / examples
+- [x] Lightweight CLI (`init`, `list-templates`, `version`)
+- [x] MCP guidance + `add-mcp` / `list-mcp`
 - [ ] Ability to refresh selected parts from upstream OpenSpec / BMAD when desired ("fork and go + optional reinstall")
-- [ ] `agentseed add-skill` / `add-mcp` helpers
+- [ ] `agentseed add-skill` helper
+- [ ] Templates auto-including skills on `init`
 
 ---
 
@@ -169,6 +195,7 @@ A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 - **Tool-agnostic skills** — prefer the emerging neutral `.agents/skills/` location
 - **Cost-aware multi-agent** — hybrid speaker selection + mode controls
 - **Spec-first** — agree on intent before writing large amounts of code
+- **MCP optional** — core workflows work without it; tools are additive
 
 ---
 
