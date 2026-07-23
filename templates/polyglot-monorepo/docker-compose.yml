@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  # Add services as the project takes shape
+  # frontend:
+  #   build: ./packages/frontend
+  # backend:
+  #   build: ./packages/backend
+  # worker:
+  #   build: ./packages/worker
+
+networks:
+  default:
+    name: agentseed-polyglot
