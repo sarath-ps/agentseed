@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs & editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs & debug
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+
+# Build / coverage / cache
+coverage/
+.nyc_output/
+.cache/
+.turbo/
+.next/
+out/
+.nuxt/
+dist/
+build/
+
+# Agent / local runtime
+.agentseed-local/
+*.local.md
+
+# Optional tool caches
+.cursor/cache/
+.claude/cache/
