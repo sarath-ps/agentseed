@@ -1,0 +1,53 @@
+# AgentSeed OpenRouter model cost ladder
+# Pins are examples — update as models change. Policy levels stay stable.
+
+version: 1
+provider: openrouter
+
+levels:
+  L0:
+    role: triage_summarize
+    description: Classify tasks, route, compress context, reflect auxiliaries
+    examples:
+      - deepseek/deepseek-v4-flash
+      - google/gemini-flash
+    max_prefer: true
+
+  L1:
+    role: default_implement
+    description: Default apply loops, routine refactors, tests
+    examples:
+      - deepseek/deepseek-v4-pro
+      - z-ai/glm-5
+    max_prefer: true
+
+  L2:
+    role: hard_implement
+    description: Long context, multi-file agentic coding, sticky L1 failures
+    examples:
+      - moonshotai/kimi-k3
+      - deepseek/deepseek-v4-pro
+
+  L3:
+    role: design_review
+    description: Architecture, security review, repeated verify failure
+    examples:
+      - anthropic/claude-sonnet
+      - openai/gpt-5
+
+  L4:
+    role: final_gate
+    description: Rare ship-critical review only
+    examples:
+      - anthropic/claude-opus
+      - openai/gpt-5-pro
+
+rules:
+  - Start at the lowest level that can complete the task.
+  - Escalate only on verify failure, explicit design work, or user request.
+  - Party Mode defaults to L1; architecture-review may pin Architect to L3.
+  - Background reflect / review auxiliaries should use L0 when the harness allows.
+
+targets:
+  token_share_l0_l1_min: 0.80
+  token_share_l4_max: 0.05

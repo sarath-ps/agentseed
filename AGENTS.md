@@ -1,32 +1,80 @@
-# AgentSeed Agents
+# AgentSeed — Project Contract
 
-This file is the single source of truth for all agent roles and Party Mode behaviour.
+This file is the **harness-agnostic** source of truth for roles, workflow, cost policy, and Party Mode.
 
-## Skills Location (Important)
+Any agent runtime (Pi, Hermes, Cursor, Claude Code, Codex, …) should load this file and the canonical paths below. AgentSeed is a **project contract**, not a runtime.
 
-**Canonical skills directory:** `.agents/skills/`
+---
 
-All AgentSeed skills live under `.agents/skills/`.  
-Agents and tools **must** load skills from this path.
+## Canonical paths
 
-This location was chosen for broader compatibility across tools (Cursor, Codex, Claude Code, Copilot, Antigravity/Gemini, etc.). Individual tools may also look in their native paths (`.cursor/skills/`, `.claude/skills/`, …). When in doubt, prefer `.agents/skills/`.
+| Path | Purpose |
+|------|---------|
+| `.agents/skills/` | Skills (Agent Skills / SKILL.md) |
+| `.agents/mcp.json` | MCP servers (tool-neutral) |
+| `.agents/policy/models.openrouter.yaml` | Model cost ladder |
+| `.agents/policy/workflow.md` | explore → archive rules |
+| `.agents/memory/MEMORY.md` | Bounded project memory (optional) |
+| `agentseed/specs/` | Living specs |
+| `agentseed/changes/` | Active and archived changes |
+| `adapters/` | Per-harness discovery notes only |
 
-## Roles (Generic)
+**Do not** treat `.cursor/`, `.claude/`, or `~/.hermes/` as source of truth for project knowledge.
 
-| Role | Primary Responsibility |
+---
+
+## Model cost ladder (OpenRouter)
+
+Follow `.agents/policy/models.openrouter.yaml`.
+
+| Level | Role | When |
+|-------|------|------|
+| **L0** | Triage / summarize | Classify, route, compress, reflect auxiliaries |
+| **L1** | Default implement | Most apply loops |
+| **L2** | Hard implement | Long context, multi-file, sticky failures |
+| **L3** | Design / review | Architecture, security, repeated verify fail |
+| **L4** | Final gate | Rare ship-critical review |
+
+**Rules**
+
+1. Start at the lowest level that can complete the task.
+2. Escalate only on verify failure, explicit design work, or user request.
+3. Party Mode defaults to **L1**; `architecture-review` may use **L3** for Architect only.
+4. Prefer **Pi** (or another thin coding harness) for apply loops; use **Hermes** optionally for long-running / personal memory — not required.
+
+Target: most tokens at L0–L1; L4 exceptional.
+
+---
+
+## Roles (generic)
+
+| Role | Primary responsibility |
 |------|------------------------|
-| **Analyst** | Research, problem framing, opportunity analysis |
-| **Product Manager** | Requirements, prioritization, stories / PRD |
-| **Architect** | System design, technical decisions, trade-offs |
-| **Developer** | Implementation against specs and tasks |
-| **QA Engineer** | Verification, test strategy, acceptance criteria |
-| **UX Designer** | User flows, interaction design, usability |
-| **Technical Writer** | Documentation, clarity, living docs |
-| **Facilitator** | Orchestrates Party Mode (optional meta-role) |
+| **Analyst** | Research, problem framing |
+| **Product Manager** | Requirements, prioritization |
+| **Architect** | Design, trade-offs |
+| **Developer** | Implementation against tasks |
+| **QA Engineer** | Verification, acceptance |
+| **UX Designer** | Flows, usability |
+| **Technical Writer** | Docs clarity |
+| **Facilitator** | Party Mode orchestration |
+
+---
+
+## Spec-driven workflow
+
+See `.agents/policy/workflow.md`.
+
+1. **Explore** — clarify intent  
+2. **Propose** — `agentseed/changes/<id>/` (proposal, design, tasks, deltas)  
+3. **Apply** — implement only approved scope  
+4. **Verify** — check against proposal and specs  
+5. **Archive** — merge deltas into living specs  
+6. **Reflect** (optional) — update `.agents/memory` and/or project skills after non-trivial success or correction  
+
+---
 
 ## Party Mode
-
-Invoke at any time with:
 
 ```
 /party
@@ -37,41 +85,26 @@ Invoke at any time with:
 /party risk-review
 ```
 
-Optional flags:
-- `--mode session|hybrid|subagent`
-- `--non-interactive "..."`
+Flags: `--mode session|hybrid|subagent`, `--non-interactive "..."`
 
-### Modes (Cost Profiles)
+| Mode | Cost | Use |
+|------|------|-----|
+| `session` | Lowest | Ideation |
+| `hybrid` | Balanced (default) | Everyday |
+| `subagent` | Highest | Hard reviews |
 
-| Mode | Independence | Cost | Recommended Use |
-|------|--------------|------|-----------------|
-| `session` | Low | Lowest | Ideation, quick discussion |
-| `hybrid` | Medium | Balanced | Everyday (default) |
-| `subagent` | High | Highest | Architecture / design / risk reviews |
+Facilitation: stay in role; surface trade-offs; prefer decisions and next change-id; max rounds 8–12; rolling summary; cheap model for speaker selection when needed.
 
-### Facilitation Rules
+---
 
-- Agents stay strictly in character.
-- Disagreements and trade-offs must be surfaced explicitly.
-- Prefer concrete outputs: decisions, open questions, recommended next change.
-- At session end, produce a summary and optionally seed a new change under `agentseed/changes/`.
+## Harness adapters
 
-### Speaker Selection (Cost Optimised)
+See `adapters/` for how Pi, Hermes, Cursor, and Claude discover this contract.  
+Adding a harness = copy `adapters/_template` and document discovery paths only.
 
-1. Prefer rule-based / round-robin with preset bias.
-2. Use a cheap/fast model for facilitator decisions when LLM selection is required.
-3. Maintain a rolling summary instead of full history.
-4. Enforce max rounds (default 8–12) + early termination on consensus.
-5. User can override at any time (“Architect, respond next”).
+---
 
-## Spec-Driven Workflow
+## Skills location
 
-Work through the OpenSpec-inspired structure under `agentseed/`:
-
-1. **Explore** – clarify intent
-2. **Propose** – create change with proposal.md / design.md / tasks.md + spec deltas
-3. **Apply** – implement the tasks
-4. **Verify** – check against specs and acceptance criteria
-5. **Archive** – merge deltas into living specs
-
-All agents should prefer reading and updating files under `agentseed/specs/` and `agentseed/changes/`.
+**Canonical:** `.agents/skills/`  
+All AgentSeed skills live there. Tools may mirror into native paths; mirrors are not authoritative.
