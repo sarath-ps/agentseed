@@ -10,14 +10,40 @@ It gives you:
 - **Generic specialist roles** (Analyst, Product Manager, Architect, Developer, QA, UX, Technical Writer)
 - **Party Mode** — multi-agent collaboration you can invoke at any time for ideation, architecture reviews, technical evaluation, design reviews, and risk reviews
 - Cost-aware speaker selection and modes (`session` / `hybrid` / `subagent`)
-- Project templates (coming next) including polyglot monorepos
+- Project templates (`minimal`, `polyglot-monorepo`)
+- A lightweight CLI (`agentseed init …`)
 - Skills that work across Cursor, Codex, Claude Code, Copilot, Antigravity/Gemini, and other tools that support the Agent Skills format
 
 ---
 
 ## Quick Start
 
-1. Clone or use this repository as a starting point for a new project.
+### Option A — Use the CLI (recommended)
+
+```bash
+# From the AgentSeed repository root (or after installing the package)
+pip install -e .          # or: uv pip install -e .
+
+# Create a new project
+agentseed init my-project --template minimal
+agentseed init my-services --template polyglot-monorepo
+
+# Other commands
+agentseed list-templates
+agentseed version
+```
+
+Then:
+
+```bash
+cd my-project
+# Ensure skills are available under .agents/skills/
+# Read AGENTS.md and start working
+```
+
+### Option B — Manual copy
+
+1. Copy a template from `templates/` (or clone this repository).
 2. Skills live under **`.agents/skills/`** (the canonical location).
 3. Read `AGENTS.md` — it is the single source of truth for roles and Party Mode behaviour.
 4. Start working with the workflow skills or invoke Party Mode:
@@ -27,6 +53,36 @@ It gives you:
 /party architecture-review
 /party technical-evaluation
 ```
+
+---
+
+## CLI Usage
+
+| Command | Description |
+|---------|-------------|
+| `agentseed init <name>` | Create a new project (default template: `minimal`) |
+| `agentseed init <name> -t polyglot-monorepo` | Create a polyglot monorepo skeleton |
+| `agentseed init <name> --force` | Overwrite the target directory if it already exists |
+| `agentseed list-templates` | Show available templates |
+| `agentseed version` | Print the current version |
+
+### Examples
+
+```bash
+# Minimal project
+agentseed init demo-app
+
+# Polyglot monorepo
+agentseed init platform --template polyglot-monorepo
+
+# Overwrite an existing directory
+agentseed init demo-app --force
+
+# Discover templates
+agentseed list-templates
+```
+
+After creation the CLI prints the next steps (enter the directory, ensure skills are present, read `AGENTS.md`).
 
 ---
 
@@ -84,7 +140,12 @@ A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 │   ├── specs/
 │   ├── changes/
 │   └── party/
+├── templates/
+│   ├── minimal/
+│   └── polyglot-monorepo/
+├── src/agentseed/            # CLI package
 ├── .cursor/skills/           # Compatibility note only
+├── pyproject.toml
 └── README.md
 ```
 
@@ -92,11 +153,12 @@ A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 
 ## Roadmap (near-term)
 
-- [ ] Project templates (`minimal`, `polyglot-monorepo`)
-- [ ] `.gitignore`, LICENSE, and repository topics
-- [ ] Optional CLI (`agentseed init`, `agentseed update methods`, …)
-- [ ] MCP server configuration helpers
+- [x] Project templates (`minimal`, `polyglot-monorepo`)
+- [x] `.gitignore` and MIT License
+- [x] Lightweight CLI (`agentseed init`, `list-templates`, `version`)
+- [ ] MCP server configuration helpers / examples
 - [ ] Ability to refresh selected parts from upstream OpenSpec / BMAD when desired ("fork and go + optional reinstall")
+- [ ] `agentseed add-skill` / `add-mcp` helpers
 
 ---
 
@@ -112,10 +174,10 @@ A short compatibility note is kept under `.cursor/skills/` for Cursor users.
 
 ## License
 
-MIT (to be added in a follow-up PR)
+MIT
 
 ---
 
 ## Contributing
 
-This project is early. PRs that improve the core skills, Party Mode behaviour, templates, or documentation are welcome.
+This project is early. PRs that improve the core skills, Party Mode behaviour, templates, CLI, or documentation are welcome.
